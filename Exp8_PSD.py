@@ -1,11 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import sys
+import numpy as np
+import plotly.graph_objects as go
+import plotly.express as px
 from scipy.signal import find_peaks
 
 # Load the dataset
-isotope  = sys.argv[1]
+isotope = sys.argv[1]
 raw_data = np.loadtxt(fr"C:\Users\jerem\OneDrive\Grad School\NUCE 597\Exp8\{isotope}_001_wf_0.dat")
 w = 4096  # 12-bit digitizer
 rows, columns = raw_data.shape
@@ -18,13 +18,10 @@ for i in range(rows // 96):
         two_d[i, j] = w - raw_data[counter1, 1]
         counter1 += 1
 
-# Troubleshooting and setting parameters for the cutoffs
+# Troubleshooting
 average_two_d = np.mean(two_d, axis=0)
-plt.plot(average_two_d)
-plt.title('Average Channel vs. Sample Number')
-plt.xlabel('Sample Number (4ns each)')
-plt.ylabel('Average Channel')
-plt.show()
+fig = px.line(y=average_two_d, title=f'{isotope} Average Channel vs. Sample Number', labels={'index': 'Sample Number (4ns each)', 'y': 'Average Channel'})
+fig.show()
 
 max_two_d = np.max(two_d, axis=1)
 
@@ -61,73 +58,52 @@ def compute_axis_limits(data, factor=1.5):
 x_min_full, x_max_full = compute_axis_limits(full)
 y_min_tail, y_max_tail = compute_axis_limits(tail)
 x_min_max_two_d, x_max_max_two_d = compute_axis_limits(max_two_d)
-y_min_TTF, y_max_TTF = compute_axis_limits(TTF, factor=7)  # TTF values typically require larger factor
+y_min_TTF, y_max_TTF = compute_axis_limits(TTF, factor=7)  # TTF values typically require a larger factor
 y_min_TTH, y_max_TTH = compute_axis_limits(TTH, factor=7)
 y_min_TTM, y_max_TTM = compute_axis_limits(TTM, factor=7)
 
 # Plotting histograms and scatter plots
-plt.hist(TTF, bins=10000)
-plt.title('Histogram of Tail to Total Ratios')
-plt.xlabel('Tail to Total Ratio (10000 bins)')
-plt.ylabel('Counts per Bin')
-plt.axis([y_min_TTF, y_max_TTF, 0, 200])
-plt.show()
+fig = px.histogram(TTF, nbins=10000, title=f'{isotope} Histogram of Tail to Total Ratios', labels={'value': 'Tail to Total Ratio (10000 bins)', 'count': 'Counts per Bin'})
+fig.update_xaxes(range=[y_min_TTF, y_max_TTF])
+fig.show()
 
-plt.scatter(full, tail, s=1)
-plt.title('Tail vs. Total Integral')
-plt.xlabel('Total Integral')
-plt.ylabel('Tail Integral')
-plt.axis([x_min_full, x_max_full, y_min_tail, y_max_tail])
-plt.show()
+fig = px.scatter(x=full, y=tail, title=f'{isotope} Tail vs. Total Integral', labels={'x': 'Total Integral', 'y': 'Tail Integral'})
+fig.update_xaxes(range=[x_min_full, x_max_full])
+fig.update_yaxes(range=[y_min_tail, y_max_tail])
+fig.show()
 
-plt.scatter(max_two_d, TTF, s=1)
-plt.title('Tail to Total Ratio vs. Max Pulse Height')
-plt.xlabel('Max Pulse Height')
-plt.ylabel('Tail to Total Ratio')
-plt.axis([x_min_max_two_d, x_max_max_two_d, y_min_TTF, y_max_TTF])
-plt.show()
+fig = px.scatter(x=max_two_d, y=TTF, title=f'{isotope} Tail to Total Ratio vs. Max Pulse Height', labels={'x': 'Max Pulse Height', 'y': 'Tail to Total Ratio'})
+fig.update_xaxes(range=[x_min_max_two_d, x_max_max_two_d])
+fig.update_yaxes(range=[y_min_TTF, y_max_TTF])
+fig.show()
 
-plt.hist(TTH, bins=10000)
-plt.title('Histogram of Tail to Head Ratios')
-plt.xlabel('Tail to Head Ratio (10000 bins)')
-plt.ylabel('Counts per Bin')
-plt.axis([y_min_TTH, y_max_TTH, 0, 750])
-plt.show()
+fig = px.histogram(TTH, nbins=10000, title=f'{isotope} Histogram of Tail to Head Ratios', labels={'value': 'Tail to Head Ratio (10000 bins)', 'count': 'Counts per Bin'})
+fig.update_xaxes(range=[y_min_TTH, y_max_TTH])
+fig.show()
 
-plt.scatter(head, tail, s=1)
-plt.title('Tail vs. Head Integral')
-plt.xlabel('Head Integral')
-plt.ylabel('Tail Integral')
-plt.axis([x_min_full, x_max_full, y_min_tail, y_max_tail])
-plt.show()
+fig = px.scatter(x=head, y=tail, title=f'{isotope} Tail vs. Head Integral', labels={'x': 'Head Integral', 'y': 'Tail Integral'})
+fig.update_xaxes(range=[x_min_full, x_max_full])
+fig.update_yaxes(range=[y_min_tail, y_max_tail])
+fig.show()
 
-plt.scatter(max_two_d, TTH, s=1)
-plt.title('Tail to Head Ratio vs. Max Pulse Height')
-plt.xlabel('Max Pulse Height')
-plt.ylabel('Tail to Head Ratio')
-plt.axis([x_min_max_two_d, x_max_max_two_d, y_min_TTH, y_max_TTH])
-plt.show()
+fig = px.scatter(x=max_two_d, y=TTH, title=f'{isotope} Tail to Head Ratio vs. Max Pulse Height', labels={'x': 'Max Pulse Height', 'y': 'Tail to Head Ratio'})
+fig.update_xaxes(range=[x_min_max_two_d, x_max_max_two_d])
+fig.update_yaxes(range=[y_min_TTH, y_max_TTH])
+fig.show()
 
-plt.hist(TTM, bins=10000)
-plt.title('Histogram of Tail to Max Pulse Height Ratios')
-plt.xlabel('Tail to Max Pulse Height Ratio (10000 bins)')
-plt.ylabel('Counts per Bin')
-plt.axis([y_min_TTM, y_max_TTM, 0, 400])
-plt.show()
+fig = px.histogram(TTM, nbins=10000, title=f'{isotope} Histogram of Tail to Max Pulse Height Ratios', labels={'value': 'Tail to Max Pulse Height Ratio (10000 bins)', 'count': 'Counts per Bin'})
+fig.update_xaxes(range=[y_min_TTM, y_max_TTM])
+fig.show()
 
-plt.scatter(max_two_d, tail, s=1)
-plt.title('Tail Integral vs. Max Pulse Height')
-plt.xlabel('Max Pulse Height')
-plt.ylabel('Tail Integral')
-plt.axis([x_min_max_two_d, x_max_max_two_d, y_min_tail, y_max_tail])
-plt.show()
+fig = px.scatter(x=max_two_d, y=tail, title=f'{isotope} Tail Integral vs. Max Pulse Height', labels={'x': 'Max Pulse Height', 'y': 'Tail Integral'})
+fig.update_xaxes(range=[x_min_max_two_d, x_max_max_two_d])
+fig.update_yaxes(range=[y_min_tail, y_max_tail])
+fig.show()
 
-plt.scatter(max_two_d, TTM, s=1)
-plt.title('Tail to Max Pulse Height Ratio vs. Max Pulse Height')
-plt.xlabel('Max Pulse Height')
-plt.ylabel('Tail to Max Pulse Height Ratio')
-plt.axis([x_min_max_two_d, x_max_max_two_d, y_min_TTM, y_max_TTM])
-plt.show()
+fig = px.scatter(x=max_two_d, y=TTM, title=f'{isotope} Tail to Max Pulse Height Ratio vs. Max Pulse Height', labels={'x': 'Max Pulse Height', 'y': 'Tail to Max Pulse Height Ratio'})
+fig.update_xaxes(range=[x_min_max_two_d, x_max_max_two_d])
+fig.update_yaxes(range=[y_min_TTM, y_max_TTM])
+fig.show()
 
 # Counting neutrons vs. gammas based on cutoffs
 neutrons_TTF = np.sum(TTF > 0.13)
@@ -185,3 +161,4 @@ print("{:<40} {:<10}".format("Method", "FOM"))
 print("{:<40} {:<10}".format("(1) Tail Integral vs. Full Integral", fom_ttf))
 print("{:<40} {:<10}".format("(2) Tail Integral vs. Head Integral", fom_tth))
 print("{:<40} {:<10}".format("(3) Tail Integral vs. Maximum Pulse-Height", fom_ttm))
+
